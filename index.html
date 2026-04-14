@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Frame Prediction</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 24px; }
+    .thumb { margin: 8px; max-width: 200px; border: 1px solid #ddd; padding: 4px; }
+    .grid { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-start; }
+    label { display: inline-block; margin-right: 8px; }
+  </style>
+</head>
+<body>
+  <h2>Frame Prediction</h2>
+  <form id="uploadForm" enctype="multipart/form-data">
+    <div>
+      <label for="model_choice">Select Model:</label>
+      <select name="model_choice" id="model_choice">
+        <option value="convlstm">ConvLSTM (future frames)</option>
+        <option value="vae">BetaVAE (reconstructions / samples)</option>
+      </select>
+    </div>
+
+    <div style="margin-top:8px;">
+      <label for="num_frames">Number of frames:</label>
+      <input type="number" id="num_frames" name="num_frames" value="1" min="1" max="100" />
+      <small>(ConvLSTM produces future frames autoregressively; VAE will sample variations)</small>
+    </div>
+
+    <div style="margin-top:12px;">
+      <input type="file" name="image" accept="image/*" required />
+    </div>
+
+    <div style="margin-top:12px;">
+      <button type="submit">Generate Frame(s)</button>
+    </div>
+  </form>
+
+  <div id="result" style="margin-top:18px;"></div>
+
+  <script>
+    const form = document.getElementById('uploadForm');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(form);
+      const res = await fetch('/predict', {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+      const out = document.getElementById('result');
+      if (data.error) {
+        out.innerHTML = `<div style="color:darkred;">Error: ${data.error}</div>`;
+        return;
+      }
+      const frames = data.generated_frames || [];
+      if (frames.length === 0) {
+        out.innerHTML = '<div>No frames returned.</div>';
+        return;
+      }
+      let html = '<h3>Generated Frame(s):</h3><div class="grid">';
+      for (let i = 0; i < frames.length; i++) {
+        html += `<div><img class="thumb" src="data:image/png;base64,${frames[i]}" alt="frame ${i+1}" /><div style="text-align:center">Frame ${i+1}</div></div>`;
+      }
+      html += '</div>';
+      out.innerHTML = html;
+    });
+  </script>
+</body>
+</html>
