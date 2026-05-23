@@ -1,6 +1,7 @@
 This project compares two deep learning architectures for next-frame prediction on Atari 
 Pong gameplay. ConvLSTM achieves superior reconstruction quality, while β-VAE+RNN 
 delivers 10× faster inference suitable for real-time applications. 
+Intially i wanted to implemented gamengen paper, but due to constraints I had concluded on this idea on implementing it on atari ping pong.
 
 Key Finding: ConvLSTM wins on accuracy metrics (PSNR, SSIM, MSE, MAE), but 
 β-VAE+RNN excels in inference speed (752 FPS vs 77 FPS) and perceptual quality (LPIPS).
